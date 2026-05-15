@@ -2,6 +2,9 @@ name: Build Terminal Debug
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - fix-ime-candidate-window
 
 permissions:
   contents: read
