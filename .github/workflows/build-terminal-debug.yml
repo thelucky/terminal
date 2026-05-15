@@ -26,7 +26,7 @@ jobs:
         run: |
           Import-Module ./tools/OpenConsole.psm1
           Set-MsBuildDevEnvironment
-          Invoke-OpenConsoleBuild -Configuration Debug -Platform x64 /p:AppxSymbolPackageEnabled=false /t:Terminal\CascadiaPackage /m
+          Invoke-OpenConsoleBuild /p:Configuration=Debug /p:Platform=x64 /p:AppxSymbolPackageEnabled=false /t:Terminal\CascadiaPackage /m
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
