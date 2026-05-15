@@ -35,12 +35,17 @@ namespace winrt::Microsoft::Terminal::Control::implementation
         RECT GetCursorPosition() override;
         void HandleOutput(std::wstring_view text) override;
         ::Microsoft::Console::Render::Renderer* GetRenderer() override;
+        void EnsureFocusAssociated();
 
     private:
         ControlCore* _getCore() const noexcept;
+        bool _refreshHwnd();
+        bool _isUsableTsfHwnd(HWND hwnd) const noexcept;
 
         TermControl* _termControl = nullptr;
         HWND _hwnd = nullptr;
+        HWND _owningHwnd = nullptr;
+        bool _focusAssociated = false;
     };
 
     struct TermControl : TermControlT<TermControl>

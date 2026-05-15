@@ -1,0 +1,36 @@
+name: Build Terminal Debug
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build x64 Debug package
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build CascadiaPackage
+        shell: pwsh
+        run: |
+          Import-Module ./tools/OpenConsole.psm1
+          Set-MsBuildDevEnvironment
+          Invoke-OpenConsoleBuild -Configuration Debug -Platform x64 /p:AppxSymbolPackageEnabled=false /t:Terminal\CascadiaPackage /m
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: terminal-debug-x64
+          path: |
+            src/cascadia/CascadiaPackage/AppPackages/**/*.msix
+            src/cascadia/CascadiaPackage/bin/x64/Debug/AppX/**
+          if-no-files-found: error
+          retention-days: 3
