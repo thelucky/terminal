@@ -21,6 +21,21 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Windows SDK 10.0.22621.0
+        shell: pwsh
+        run: |
+          $vsInstaller = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vs_installer.exe"
+          $installPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+          $args = @(
+            "modify",
+            "--installPath", $installPath,
+            "--add", "Microsoft.VisualStudio.Component.Windows11SDK.22621",
+            "--quiet",
+            "--norestart",
+            "--nocache"
+          )
+          Start-Process -FilePath $vsInstaller -ArgumentList $args -Wait -NoNewWindow
+
       - name: Build CascadiaPackage
         shell: pwsh
         run: |
