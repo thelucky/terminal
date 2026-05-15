@@ -28,12 +28,21 @@ jobs:
           Set-MsBuildDevEnvironment
           Invoke-OpenConsoleBuild /p:Configuration=Debug /p:Platform=x64 /p:AppxSymbolPackageEnabled=false /t:Terminal\CascadiaPackage /m
 
+      - name: Build unpackaged portable zip
+        shell: pwsh
+        run: |
+          $terminalAppX = (Get-Item "src/cascadia/CascadiaPackage/AppPackages/**/*.msix" | Select-Object -First 1).FullName
+          $xamlAppX = (Get-Item "src/cascadia/CascadiaPackage/AppPackages/**/Dependencies/x64/Microsoft.UI.Xaml*.appx" | Select-Object -First 1).FullName
+          $outDir = New-Item -ItemType Directory "src/cascadia/CascadiaPackage/bin/x64/Debug/_unpackaged" -Force
+          ./build/scripts/New-UnpackagedTerminalDistribution.ps1 -TerminalAppX $terminalAppX -XamlAppX $xamlAppX -Destination $outDir.FullName -PortableMode
+
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
         with:
           name: terminal-debug-x64
           path: |
             src/cascadia/CascadiaPackage/AppPackages/**/*.msix
+            src/cascadia/CascadiaPackage/bin/x64/Debug/_unpackaged/*.zip
             src/cascadia/CascadiaPackage/bin/x64/Debug/AppX/**
           if-no-files-found: error
           retention-days: 3
