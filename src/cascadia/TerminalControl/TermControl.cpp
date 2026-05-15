@@ -177,53 +177,18 @@ namespace winrt::Microsoft::Terminal::Control::implementation
 
     HWND TsfDataProvider::GetHwnd()
     {
-        _refreshHwnd();
+        if (!_hwnd)
+        {
+            // WinUI's WinRT based TSF runs in its own window "Windows.UI.Input.InputSite.WindowClass" (..."great")
+            // and in order for us to snatch the focus away from that one we need to find its HWND.
+            // The way we do it here is by finding the existing, active TSF context and getting the HWND from it.
+            _hwnd = GetTSFHandle().FindWindowOfActiveTSF();
+            if (!_hwnd)
+            {
+                _hwnd = reinterpret_cast<HWND>(_termControl->OwningHwnd());
+            }
+        }
         return _hwnd;
-    }
-
-    void TsfDataProvider::EnsureFocusAssociated()
-    {
-        if (!_focusAssociated || _refreshHwnd())
-        {
-            GetTSFHandle().AssociateFocus(this);
-            _focusAssociated = true;
-        }
-    }
-
-    bool TsfDataProvider::_refreshHwnd()
-    {
-        const auto owningHwnd = reinterpret_cast<HWND>(_termControl->OwningHwnd());
-        const auto shouldRefresh = !_hwnd || _owningHwnd != owningHwnd || !_isUsableTsfHwnd(_hwnd);
-        if (!shouldRefresh)
-        {
-            return false;
-        }
-
-        _owningHwnd = owningHwnd;
-        _hwnd = GetTSFHandle().FindWindowOfActiveTSF();
-        if (!_isUsableTsfHwnd(_hwnd))
-        {
-            _hwnd = owningHwnd;
-        }
-
-        _focusAssociated = false;
-        return true;
-    }
-
-    bool TsfDataProvider::_isUsableTsfHwnd(HWND hwnd) const noexcept
-    {
-        if (!hwnd || !IsWindow(hwnd) || !IsWindowVisible(hwnd))
-        {
-            return false;
-        }
-
-        const auto owningHwnd = reinterpret_cast<HWND>(_termControl->OwningHwnd());
-        if (!owningHwnd || !IsWindow(owningHwnd))
-        {
-            return false;
-        }
-
-        return GetAncestor(hwnd, GA_ROOT) == GetAncestor(owningHwnd, GA_ROOT);
     }
 
     RECT TsfDataProvider::GetViewport()
@@ -2435,7 +2400,6 @@ namespace winrt::Microsoft::Terminal::Control::implementation
             UpdateAppearance(_core.FocusedAppearance());
         }
 
-        _tsfDataProvider.EnsureFocusAssociated();
         GetTSFHandle().Focus(&_tsfDataProvider);
     }
 
