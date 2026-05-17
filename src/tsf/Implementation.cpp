@@ -59,7 +59,7 @@ using unique_tf_propertyval = wil::unique_struct<TF_PROPERTYVAL, decltype(&TfPro
 // TF_TMAE_NOACTIVATETIP which are explicitly filtered out.
 //
 // TF_TMAE_NOACTIVATETIP however is important. Without it, TIPs are immediately initialized.
-static std::atomic<DWORD> s_activationFlags{ TF_TMAE_NOACTIVATETIP | TF_TMAE_NOACTIVATEKEYBOARDLAYOUT | TF_TMAE_CONSOLE };
+static std::atomic<DWORD> s_activationFlags{ TF_TMAE_CONSOLE };
 void Implementation::AvoidBuggyTSFConsoleFlags() noexcept
 {
     s_activationFlags.fetch_and(~static_cast<DWORD>(TF_TMAE_CONSOLE), std::memory_order_relaxed);
@@ -344,7 +344,7 @@ STDMETHODIMP Implementation::GetStatus(TF_STATUS* pdcs) noexcept
         // It's not publicly documented, but allegedly specifying this flag results in a minor performance uplift.
         // Ironically, the only two places that mention this flag internally state:
         // > perf: we could check TS_SS_NOHIDDENTEXT for better perf
-        pdcs->dwStaticFlags = TS_SS_NOHIDDENTEXT;
+        pdcs->dwStaticFlags = TS_SS_TRANSITORY | TS_SS_NOHIDDENTEXT;
     }
 
     return S_OK;
