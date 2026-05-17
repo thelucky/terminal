@@ -344,7 +344,7 @@ STDMETHODIMP Implementation::GetStatus(TF_STATUS* pdcs) noexcept
         // It's not publicly documented, but allegedly specifying this flag results in a minor performance uplift.
         // Ironically, the only two places that mention this flag internally state:
         // > perf: we could check TS_SS_NOHIDDENTEXT for better perf
-        pdcs->dwStaticFlags = TS_SS_TRANSITORY | TS_SS_NOHIDDENTEXT;
+        pdcs->dwStaticFlags = TS_SS_NOHIDDENTEXT;
     }
 
     return S_OK;
